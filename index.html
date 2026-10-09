@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WorkForce Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ===================== LOGIN PAGE ===================== -->
+<div id="page-login" class="page active">
+  <div class="login-bg">
+    <div class="login-grid-overlay"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-brand">
+      <div class="brand-icon"><i class="fas fa-industry"></i></div>
+      <h1>WorkForce<span>Manager</span></h1>
+      <p>Industrial Worker Management System</p>
+    </div>
+    <div class="login-card">
+      <h2>Sign In</h2>
+      <div id="login-error" class="alert alert-error hidden"></div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="login-role">
+          <option value="">-- Select your role --</option>
+          <option value="admin">Admin</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="worker">Worker</option>
+        </select>
+      </div>
+      <div class="form-group" id="login-id-group" style="display:none">
+        <label id="login-id-label">ID</label>
+        <input type="number" id="login-id" placeholder="Enter your ID" />
+      </div>
+      <div class="form-group" id="login-pass-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter password" />
+      </div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="handleLogin()">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </button>
+      <div class="login-hint">
+        <strong>Demo credentials:</strong><br/>
+        Admin: admin / admin123<br/>
+        Supervisor: Enter your Supervisor ID<br/>
+        Worker: Enter your Worker ID
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SHARED NAVBAR ===================== -->
+<nav id="main-nav" class="hidden">
+  <div class="nav-brand">
+    <i class="fas fa-industry"></i>
+    <span>WorkForce<b>Manager</b></span>
+  </div>
+  <div class="nav-links" id="nav-links"></div>
+  <div class="nav-user">
+    <span id="nav-user-info"></span>
+    <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</nav>
+
+<!-- ===================== ADMIN DASHBOARD ===================== -->
+<div id="page-admin" class="page dashboard-page">
+  <div class="sidebar" id="admin-sidebar">
+    <ul>
+      <li class="active" onclick="adminTab('overview')"><i class="fas fa-chart-pie"></i> Overview</li>
+      <li onclick="adminTab('departments')"><i class="fas fa-building"></i> Departments</li>
+      <li onclick="adminTab('workers')"><i class="fas fa-hard-hat"></i> Workers</li>
+      <li onclick="adminTab('supervisors')"><i class="fas fa-user-tie"></i> Supervisors</li>
+      <li onclick="adminTab('tasks')"><i class="fas fa-tasks"></i> Tasks</li>
+      <li onclick="adminTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</li>
+      <li onclick="adminTab('complaints')"><i class="fas fa-exclamation-circle"></i> Complaints</li>
+      <li onclick="adminTab('performance')"><i class="fas fa-chart-line"></i> Performance</li>
+    </ul>
+  </div>
+  <div class="main-content">
+
+    <!-- Overview Tab -->
+    <div id="admin-tab-overview" class="tab-content active">
+      <div class="page-header">
+        <h2>Dashboard Overview</h2>
+        <button class="btn btn-primary" onclick="loadAdminOverview()"><i class="fas fa-sync"></i> Refresh</button>
+      </div>
+      <div class="stats-grid" id="admin-stats"></div>
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title"><i class="fas fa-chart-bar"></i> Department Performance</h3>
+          <div id="dept-perf-table"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title"><i class="fas fa-exclamation-circle"></i> Recent Complaints</h3>
+          <div id="recent-complaints"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Departments Tab -->
+    <div id="admin-tab-departments" class="tab-content">
+      <div class="page-header">
+        <h2>Departments</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-dept')"><i class="fas fa-plus"></i> Add Department</button>
+      </div>
+      <div class="card"><div id="dept-table"></div></div>
+    </div>
+
+    <!-- Workers Tab -->
+    <div id="admin-tab-workers" class="tab-content">
+      <div class="page-header">
+        <h2>Workers</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-worker')"><i class="fas fa-plus"></i> Add Worker</button>
+      </div>
+      <div class="card"><div id="workers-table"></div></div>
+    </div>
+
+    <!-- Supervisors Tab -->
+    <div id="admin-tab-supervisors" class="tab-content">
+      <div class="page-header">
+        <h2>Supervisors</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-supervisor')"><i class="fas fa-plus"></i> Add Supervisor</button>
+      </div>
+      <div class="card"><div id="supervisors-table"></div></div>
+    </div>
+
+    <!-- Tasks Tab -->
+    <div id="admin-tab-tasks" class="tab-content">
+      <div class="page-header">
+        <h2>Tasks</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-task')"><i class="fas fa-plus"></i> Add Task</button>
+      </div>
+      <div class="card"><div id="tasks-table"></div></div>
+      <div class="page-header" style="margin-top:2rem">
+        <h2>Task Assignments</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-assign')"><i class="fas fa-plus"></i> Assign Task</button>
+      </div>
+      <div class="card"><div id="assignments-table"></div></div>
+    </div>
+
+    <!-- Attendance Tab -->
+    <div id="admin-tab-attendance" class="tab-content">
+      <div class="page-header">
+        <h2>Attendance</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-attendance')"><i class="fas fa-plus"></i> Mark Attendance</button>
+      </div>
+      <div class="card"><div id="attendance-table"></div></div>
+    </div>
+
+    <!-- Complaints Tab -->
+    <div id="admin-tab-complaints" class="tab-content">
+      <div class="page-header"><h2>Complaints</h2></div>
+      <div class="card"><div id="complaints-table"></div></div>
+    </div>
+
+    <!-- Performance Tab -->
+    <div id="admin-tab-performance" class="tab-content">
+      <div class="page-header"><h2>Worker Performance</h2></div>
+      <div class="card"><div id="performance-table"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== SUPERVISOR DASHBOARD ===================== -->
+<div id="page-supervisor" class="page dashboard-page">
+  <div class="sidebar" id="supervisor-sidebar">
+    <ul>
+      <li class="active" onclick="supervisorTab('overview')"><i class="fas fa-chart-pie"></i> Overview</li>
+      <li onclick="supervisorTab('my-workers')"><i class="fas fa-hard-hat"></i> My Workers</li>
+      <li onclick="supervisorTab('tasks')"><i class="fas fa-tasks"></i> Tasks</li>
+      <li onclick="supervisorTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</li>
+      <li onclick="supervisorTab('complaints')"><i class="fas fa-exclamation-circle"></i> Complaints</li>
+      <li onclick="supervisorTab('performance')"><i class="fas fa-chart-line"></i> Performance</li>
+    </ul>
+  </div>
+  <div class="main-content">
+
+    <div id="supervisor-tab-overview" class="tab-content active">
+      <div class="page-header">
+        <h2>Supervisor Overview</h2>
+        <button class="btn btn-primary" onclick="loadSupervisorOverview()"><i class="fas fa-sync"></i> Refresh</button>
+      </div>
+      <div class="stats-grid" id="supervisor-stats"></div>
+      <div class="card">
+        <h3 class="card-title"><i class="fas fa-tasks"></i> Task Status in My Department</h3>
+        <div id="sup-task-overview"></div>
+      </div>
+    </div>
+
+    <div id="supervisor-tab-my-workers" class="tab-content">
+      <div class="page-header"><h2>Workers in My Department</h2></div>
+      <div class="card"><div id="sup-workers-table"></div></div>
+    </div>
+
+    <div id="supervisor-tab-tasks" class="tab-content">
+      <div class="page-header">
+        <h2>Task Assignments</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-sup-assign')"><i class="fas fa-plus"></i> Assign Task</button>
+      </div>
+      <div class="card"><div id="sup-tasks-table"></div></div>
+    </div>
+
+    <div id="supervisor-tab-attendance" class="tab-content">
+      <div class="page-header">
+        <h2>Attendance</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-sup-attendance')"><i class="fas fa-plus"></i> Mark Attendance</button>
+      </div>
+      <div class="card"><div id="sup-attendance-table"></div></div>
+    </div>
+
+    <div id="supervisor-tab-complaints" class="tab-content">
+      <div class="page-header"><h2>Complaints</h2></div>
+      <div class="card"><div id="sup-complaints-table"></div></div>
+    </div>
+
+    <div id="supervisor-tab-performance" class="tab-content">
+      <div class="page-header"><h2>Department Performance</h2></div>
+      <div class="card"><div id="sup-performance-table"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== WORKER DASHBOARD ===================== -->
+<div id="page-worker" class="page dashboard-page">
+  <div class="sidebar">
+    <ul>
+      <li class="active" onclick="workerTab('overview')"><i class="fas fa-user"></i> My Profile</li>
+      <li onclick="workerTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</li>
+      <li onclick="workerTab('tasks')"><i class="fas fa-tasks"></i> My Tasks</li>
+      <li onclick="workerTab('complaints')"><i class="fas fa-exclamation-circle"></i> Complaints</li>
+      <li onclick="workerTab('performance')"><i class="fas fa-chart-line"></i> My Performance</li>
+    </ul>
+  </div>
+  <div class="main-content">
+
+    <div id="worker-tab-overview" class="tab-content active">
+      <div class="page-header"><h2>My Profile</h2></div>
+      <div id="worker-profile-card"></div>
+    </div>
+
+    <div id="worker-tab-attendance" class="tab-content">
+      <div class="page-header"><h2>My Attendance</h2></div>
+      <div class="stats-grid" id="worker-att-stats"></div>
+      <div class="card"><div id="worker-attendance-table"></div></div>
+    </div>
+
+    <div id="worker-tab-tasks" class="tab-content">
+      <div class="page-header"><h2>My Tasks</h2></div>
+      <div class="card"><div id="worker-tasks-table"></div></div>
+    </div>
+
+    <div id="worker-tab-complaints" class="tab-content">
+      <div class="page-header">
+        <h2>My Complaints</h2>
+        <button class="btn btn-primary" onclick="openModal('modal-worker-complaint')"><i class="fas fa-plus"></i> Raise Complaint</button>
+      </div>
+      <div class="card"><div id="worker-complaints-table"></div></div>
+    </div>
+
+    <div id="worker-tab-performance" class="tab-content">
+      <div class="page-header"><h2>My Performance</h2></div>
+      <div id="worker-performance-card"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeAllModals()"></div>
+
+<!-- Add Department -->
+<div id="modal-dept" class="modal hidden">
+  <div class="modal-header"><h3>Add Department</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Department ID</label><input type="number" id="dept-id" placeholder="e.g. 4"/></div>
+    <div class="form-group"><label>Department Name</label><input type="text" id="dept-name" placeholder="e.g. Logistics"/></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="addDepartment()">Add Department</button>
+  </div>
+</div>
+
+<!-- Add Worker -->
+<div id="modal-worker" class="modal hidden">
+  <div class="modal-header"><h3>Add Worker</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-row">
+      <div class="form-group"><label>Worker ID</label><input type="number" id="w-id" placeholder="ID"/></div>
+      <div class="form-group"><label>First Name</label><input type="text" id="w-fname" placeholder="First name"/></div>
+      <div class="form-group"><label>Last Name</label><input type="text" id="w-lname" placeholder="Last name"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date of Birth</label><input type="date" id="w-dob"/></div>
+      <div class="form-group"><label>Department</label><select id="w-dept"></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Street</label><input type="text" id="w-street" placeholder="Street"/></div>
+      <div class="form-group"><label>City</label><input type="text" id="w-city" placeholder="City"/></div>
+      <div class="form-group"><label>Pincode</label><input type="text" id="w-pin" placeholder="Pincode"/></div>
+    </div>
+    <div class="form-group"><label>Phone Numbers (comma-separated)</label><input type="text" id="w-phone" placeholder="e.g. 9876543210, 9123456789"/></div>
+    <div class="form-group"><label>Worker Type</label>
+      <select id="w-type" onchange="toggleWorkerTypeFields()">
+        <option value="">-- Select type --</option>
+        <option value="permanent">Permanent</option>
+        <option value="contract">Contract</option>
+      </select>
+    </div>
+    <div id="permanent-fields" class="hidden">
+      <div class="form-row">
+        <div class="form-group"><label>Salary (₹)</label><input type="number" id="w-salary" placeholder="e.g. 15000"/></div>
+        <div class="form-group"><label>Benefits</label><input type="text" id="w-benefits" placeholder="e.g. Health Insurance"/></div>
+      </div>
+    </div>
+    <div id="contract-fields" class="hidden">
+      <div class="form-row">
+        <div class="form-group"><label>Hourly Rate (₹)</label><input type="number" id="w-hourly" placeholder="e.g. 120"/></div>
+        <div class="form-group"><label>Contract Duration</label><input type="text" id="w-duration" placeholder="e.g. 6 months"/></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="addWorker()">Add Worker</button>
+  </div>
+</div>
+
+<!-- Add Supervisor -->
+<div id="modal-supervisor" class="modal hidden">
+  <div class="modal-header"><h3>Add Supervisor</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Supervisor ID</label><input type="number" id="s-id" placeholder="ID"/></div>
+    <div class="form-group"><label>Name</label><input type="text" id="s-name" placeholder="Full name"/></div>
+    <div class="form-group"><label>Department</label><select id="s-dept"></select></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="addSupervisor()">Add Supervisor</button>
+  </div>
+</div>
+
+<!-- Add Task -->
+<div id="modal-task" class="modal hidden">
+  <div class="modal-header"><h3>Add Task</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Task ID</label><input type="number" id="t-id" placeholder="ID"/></div>
+    <div class="form-group"><label>Task Name</label><input type="text" id="t-name" placeholder="Task name"/></div>
+    <div class="form-group"><label>Description</label><textarea id="t-desc" placeholder="Task description"></textarea></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="addTask()">Add Task</button>
+  </div>
+</div>
+
+<!-- Assign Task (Admin) -->
+<div id="modal-assign" class="modal hidden">
+  <div class="modal-header"><h3>Assign Task</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Worker</label><select id="a-worker"></select></div>
+    <div class="form-group"><label>Task</label><select id="a-task"></select></div>
+    <div class="form-group"><label>Supervisor</label><select id="a-supervisor"></select></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="assignTask()">Assign Task</button>
+  </div>
+</div>
+
+<!-- Mark Attendance (Admin) -->
+<div id="modal-attendance" class="modal hidden">
+  <div class="modal-header"><h3>Mark Attendance</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Worker</label><select id="att-worker"></select></div>
+    <div class="form-group"><label>Date</label><input type="date" id="att-date"/></div>
+    <div class="form-group"><label>Status</label>
+      <select id="att-status">
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+        <option value="On Leave">On Leave</option>
+        <option value="Half Day">Half Day</option>
+      </select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="markAttendance('admin')">Mark Attendance</button>
+  </div>
+</div>
+
+<!-- Assign Task (Supervisor) -->
+<div id="modal-sup-assign" class="modal hidden">
+  <div class="modal-header"><h3>Assign Task to Worker</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Worker (My Department)</label><select id="sup-a-worker"></select></div>
+    <div class="form-group"><label>Task</label><select id="sup-a-task"></select></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="supAssignTask()">Assign Task</button>
+  </div>
+</div>
+
+<!-- Mark Attendance (Supervisor) -->
+<div id="modal-sup-attendance" class="modal hidden">
+  <div class="modal-header"><h3>Mark Attendance</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Worker (My Department)</label><select id="sup-att-worker"></select></div>
+    <div class="form-group"><label>Date</label><input type="date" id="sup-att-date"/></div>
+    <div class="form-group"><label>Status</label>
+      <select id="sup-att-status">
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+        <option value="On Leave">On Leave</option>
+        <option value="Half Day">Half Day</option>
+      </select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="markAttendance('supervisor')">Mark Attendance</button>
+  </div>
+</div>
+
+<!-- Raise Complaint (Worker) -->
+<div id="modal-worker-complaint" class="modal hidden">
+  <div class="modal-header"><h3>Raise Complaint</h3><button onclick="closeAllModals()"><i class="fas fa-times"></i></button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Complaint ID</label><input type="number" id="wc-id" placeholder="Unique complaint ID"/></div>
+    <div class="form-group"><label>Description</label><textarea id="wc-desc" placeholder="Describe your complaint..."></textarea></div>
+    <div class="form-group"><label>Supervisor (optional)</label><select id="wc-sup"><option value="">-- No specific supervisor --</option></select></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" onclick="closeAllModals()">Cancel</button>
+    <button class="btn btn-primary" onclick="raiseComplaint()">Submit Complaint</button>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+
+# Workforce Manager
+
+A DBMS mini project made to manage workers, departments, tasks, attendance and complaints in one place.
+
+## Features
+
+- Separate login for Admin, Supervisor and Worker
+- Manage worker and department details
+- Assign tasks and track their status
+- Maintain attendance records
+- Register and manage complaints
+- View worker performance
+- Store and fetch data using Supabase
+
+## Technologies Used
+
+- HTML
+- CSS
+- JavaScript
+- Supabase (PostgreSQL)
+
+## How to Run
+
+1. Download or clone this repository.
+2. Open the project folder.
+3. Configure your Supabase project URL and API key in `app.js`.
+4. Make sure the required database tables and permissions are set up in Supabase.
+5. Open `index.html` in your browser.
+
+## Project Structure
+
+- `index.html` - Main pages and layout
+- `style.css` - Styling and responsive layout
+- `app.js` - Login, dashboard and database operations
+
+## Note
+
+This project was developed as part of a DBMS mini project. A working Supabase setup is required to use the database features.
