@@ -34,6 +34,9 @@ A DBMS mini project made to manage workers, departments, tasks, attendance and c
 - `style.css` - Styling and responsive layout
 - `app.js` - Login, dashboard and database operations
 
+## Author
+Anam Shaikh
+
 ## Note
 
 This project was developed as part of a DBMS mini project. A working Supabase setup is required to use the database features.
